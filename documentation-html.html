@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dokumentacja API Transkrypcji Mediów</title>
+    <style>
+        :root {
+            --primary-color: #2962ff;
+            --secondary-color: #0039cb;
+            --background-color: #ffffff;
+            --text-color: #333333;
+            --code-bg-color: #f5f7f9;
+            --border-color: #e1e4e8;
+            --section-bg-color: #f8f9fa;
+            --table-header-bg: #f1f2f3;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 1.5em;
+            margin-bottom: 0.75em;
+            color: #000;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-top: 0;
+            padding-bottom: 0.3em;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h2 {
+            font-size: 1.8em;
+            padding-bottom: 0.3em;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h3 {
+            font-size: 1.4em;
+        }
+
+        h4 {
+            font-size: 1.2em;
+        }
+
+        p, ul, ol {
+            margin-bottom: 1em;
+        }
+
+        ul, ol {
+            padding-left: 2em;
+        }
+
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+            color: var(--secondary-color);
+        }
+
+        pre {
+            background-color: var(--code-bg-color);
+            border-radius: 6px;
+            padding: 16px;
+            overflow: auto;
+            margin-bottom: 1em;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 0.95em;
+        }
+
+        code {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            background-color: var(--code-bg-color);
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-size: 0.95em;
+        }
+
+        pre code {
+            padding: 0;
+            background-color: transparent;
+        }
+
+        blockquote {
+            margin: 0 0 1em;
+            padding: 0 1em;
+            color: #6a737d;
+            border-left: 0.25em solid #dfe2e5;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 1em;
+        }
+
+        table th, table td {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        table th {
+            background-color: var(--table-header-bg);
+            font-weight: 600;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+
+        .toc {
+            background-color: var(--section-bg-color);
+            border-radius: 6px;
+            padding: 1em;
+            margin-bottom: 2em;
+        }
+
+        .toc ul {
+            list-style-type: none;
+            padding-left: 1em;
+        }
+
+        .toc li {
+            margin-bottom: 0.5em;
+        }
+
+        .method {
+            display: inline-block;
+            padding: 3px 6px;
+            font-weight: bold;
+            border-radius: 4px;
+            font-size: 0.85em;
+            margin-right: 8px;
+        }
+
+        .method-post {
+            background-color: #49cc90;
+            color: white;
+        }
+
+        .method-get {
+            background-color: #61affe;
+            color: white;
+        }
+
+        .endpoint {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-weight: bold;
+        }
+
+        .endpoint-section {
+            background-color: var(--section-bg-color);
+            border-radius: 6px;
+            padding: 1.5em;
+            margin-bottom: 1.5em;
+            border: 1px solid var(--border-color);
+        }
+
+        .status-code {
+            display: inline-block;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            margin-right: 8px;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        }
+
+        .status-200 {
+            background-color: #49cc90;
+            color: white;
+        }
+
+        .status-400, .status-401, .status-404 {
+            background-color: #f93e3e;
+            color: white;
+        }
+
+        .status-500 {
+            background-color: #e53935;
+            color: white;
+        }
+
+        .header-anchor {
+            opacity: 0;
+            transition: opacity 0.2s;
+            font-size: 0.85em;
+            padding-left: 0.5em;
+        }
+
+        h2:hover .header-anchor,
+        h3:hover .header-anchor,
+        h4:hover .header-anchor {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            h2 {
+                font-size: 1.6em;
+            }
+            
+            pre {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Dokumentacja API Transkrypcji Mediów</h1>
+    
+    <div class="toc">
+        <h2 id="spis-treści">Spis treści</h2>
+        <ul>
+            <li><a href="#przegląd">1. Przegląd</a></li>
+            <li><a href="#instalacja">2. Instalacja</a></li>
+            <li><a href="#konfiguracja">3. Konfiguracja</a></li>
+            <li><a href="#endpointy-api">4. Endpointy API</a></li>
+            <li><a href="#uwierzytelnianie">5. Uwierzytelnianie</a></li>
+            <li><a href="#system-proxy">6. System proxy</a></li>
+            <li><a href="#obsługa-błędów">7. Obsługa błędów</a></li>
+            <li><a href="#architektura">8. Architektura</a></li>
+            <li><a href="#skalowanie">9. Skalowanie</a></li>
+            <li><a href="#bezpieczeństwo">10. Bezpieczeństwo</a></li>
+            <li><a href="#znane-ograniczenia">11. Znane ograniczenia</a></li>
+            <li><a href="#rozwiązywanie-problemów">12. Rozwiązywanie problemów</a></li>
+        </ul>
+    </div>
+
+    <h2 id="przegląd">Przegląd <a href="#przegląd" class="header-anchor">#</a></h2>
+    
+    <p>API Transkrypcji Mediów to serwis, który umożliwia automatyczną transkrypcję treści audio z dwóch źródeł:</p>
+    <ol>
+        <li>Plików audio/wideo dostępnych pod URL-em</li>
+        <li>Filmów z platformy YouTube</li>
+    </ol>
+    
+    <p>Serwis wykorzystuje OpenAI Whisper do transkrypcji plików audio oraz YouTube Transcript API do pobierania napisów z filmów YouTube. System zaprojektowano z myślą o niezawodności, implementując mechanizmy retry i rotacji proxy.</p>
+
+    <h3 id="technologie">Technologie <a href="#technologie" class="header-anchor">#</a></h3>
+    <ul>
+        <li><strong>Flask</strong>: Framework webowy Python</li>
+        <li><strong>Whisper</strong>: Model AI do transkrypcji audio</li>
+        <li><strong>YouTube Transcript API</strong>: Biblioteka do pobierania napisów z YouTube</li>
+        <li><strong>Docker</strong>: Konteneryzacja aplikacji</li>
+        <li><strong>Gunicorn</strong>: Serwer WSGI</li>
+    </ul>
+
+    <h2 id="instalacja">Instalacja <a href="#instalacja" class="header-anchor">#</a></h2>
+
+    <h3 id="wymagania">Wymagania <a href="#wymagania" class="header-anchor">#</a></h3>
+    <ul>
+        <li>Docker</li>
+        <li>Klucz API Webshare (do systemu proxy)</li>
+        <li>Własny klucz API (do uwierzytelniania żądań)</li>
+    </ul>
+
+    <h3 id="instalacja-docker">Instalacja z użyciem Docker <a href="#instalacja-docker" class="header-anchor">#</a></h3>
+    
+    <ol>
+        <li>
+            <p>Sklonuj repozytorium:</p>
+            <pre><code>git clone [url-do-repozytorium]
+cd [nazwa-repozytorium]</code></pre>
+        </li>
+        <li>
+            <p>Zbuduj obraz Docker:</p>
+            <pre><code>docker build -t media-transcription-api .</code></pre>
+        </li>
+        <li>
+            <p>Uruchom kontener:</p>
+            <pre><code>docker run -p 8080:8080 \
+  -e API_KEY=twój_klucz_api \
+  -e WEBSHARE_API_KEY=twój_klucz_webshare \
+  media-transcription-api</code></pre>
+        </li>
+    </ol>
+
+    <h3 id="instalacja-manualna">Instalacja manualna <a href="#instalacja-manualna" class="header-anchor">#</a></h3>
+    
+    <ol>
+        <li>
+            <p>Upewnij się, że masz zainstalowany Python 3.9+ oraz ffmpeg.</p>
+        </li>
+        <li>
+            <p>Zainstaluj zależności:</p>
+            <pre><code>pip install -r requirements.txt</code></pre>
+        </li>
+        <li>
+            <p>Uruchom aplikację:</p>
+            <pre><code>export API_KEY=twój_klucz_api
+export WEBSHARE_API_KEY=twój_klucz_webshare
+gunicorn --bind 0.0.0.0:8080 --timeout 300 app:app</code></pre>
+        </li>
+    </ol>
+
+    <h2 id="konfiguracja">Konfiguracja <a href="#konfiguracja" class="header-anchor">#</a></h2>
+    
+    <p>Aplikacja jest konfigurowana przez zmienne środowiskowe:</p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Zmienna środowiskowa</th>
+                <th>Opis</th>
+                <th>Wymagana</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>API_KEY</code></td>
+                <td>Klucz uwierzytelniający dla klientów API</td>
+                <td>Tak</td>
+            </tr>
+            <tr>
+                <td><code>WEBSHARE_API_KEY</code></td>
+                <td>Klucz API dla serwisu proxy Webshare</td>
+                <td>Tak</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2 id="endpointy-api">Endpointy API <a href="#endpointy-api" class="header-anchor">#</a></h2>
+
+    <div class="endpoint-section">
+        <h3 id="transcribe-media">1. Transkrypcja pliku multimedialnego <a href="#transcribe-media" class="header-anchor">#</a></h3>
+        
+        <p>Transkrybuje plik audio/wideo dostępny pod podanym URL-em.</p>
+        
+        <p>
+            <span class="method method-post">POST</span>
+            <span class="endpoint">/transcribe-media</span>
+        </p>
+        
+        <h4>Nagłówki:</h4>
+        <ul>
+            <li><code>X-API-Key</code>: Twój klucz API</li>
+            <li><code>Content-Type</code>: application/json</li>
+        </ul>
+        
+        <h4>Ciało żądania:</h4>
+        <pre><code>{
+  "media_url": "https://przykład.com/plik.mp3"
+}</code></pre>
+        
+        <h4>Odpowiedź:</h4>
+        <pre><code>{
+  "response": "Tekst transkrypcji pliku audio..."
+}</code></pre>
+        
+        <h4>Kody odpowiedzi:</h4>
+        <ul>
+            <li><span class="status-code status-200">200</span> Sukces</li>
+            <li><span class="status-code status-400">400</span> Brak wymaganego parametru <code>media_url</code></li>
+            <li><span class="status-code status-401">401</span> Brak autoryzacji (nieprawidłowy klucz API)</li>
+            <li><span class="status-code status-500">500</span> Błąd serwera</li>
+        </ul>
+    </div>
+
+    <div class="endpoint-section">
+        <h3 id="transcribe-yt">2. Transkrypcja filmu YouTube <a href="#transcribe-yt" class="header-anchor">#</a></h3>
+        
+        <p>Pobiera napisy z filmu YouTube lub generuje transkrypcję, jeśli napisy nie są dostępne.</p>
+        
+        <p>
+            <span class="method method-post">POST</span>
+            <span class="endpoint">/transcribe-YT</span>
+        </p>
+        
+        <h4>Nagłówki:</h4>
+        <ul>
+            <li><code>X-API-Key</code>: Twój klucz API</li>
+            <li><code>Content-Type</code>: application/json</li>
+        </ul>
+        
+        <h4>Ciało żądania:</h4>
+        <pre><code>{
+  "YT_url": "https://www.youtube.com/watch?v=przykładowe_id",
+  "language": "pl"  // opcjonalnie: preferowany język napisów
+}</code></pre>
+        
+        <h4>Odpowiedź:</h4>
+        <pre><code>{
+  "response": [
+    {
+      "text": "Fragment transkrypcji",
+      "start": 0.0,
+      "duration": 3.45
+    },
+    // ...więcej fragmentów
+  ],
+  "metadata": {
+    "language": "pl",
+    "requested_language": "pl"
+  }
+}</code></pre>
+        
+        <h4>Kody odpowiedzi:</h4>
+        <ul>
+            <li><span class="status-code status-200">200</span> Sukces</li>
+            <li><span class="status-code status-400">400</span> Brak wymaganego parametru <code>YT_url</code> lub nieprawidłowy URL</li>
+            <li><span class="status-code status-401">401</span> Brak autoryzacji (nieprawidłowy klucz API)</li>
+            <li><span class="status-code status-404">404</span> Nie znaleziono napisów dla filmu</li>
+            <li><span class="status-code status-500">500</span> Błąd serwera</li>
+        </ul>
+    </div>
+
+    <h2 id="uwierzytelnianie">Uwierzytelnianie <a href="#uwierzytelnianie" class="header-anchor">#</a></h2>
+    
+    <p>Wszystkie żądania do API muszą zawierać nagłówek <code>X-API-Key</code> z prawidłowym kluczem API. Klucz jest konfigurowany przy uruchamianiu serwera przez zmienną środowiskową <code>API_KEY</code>.</p>
+    
+    <p>Przykład autoryzowanego żądania:</p>
+    <pre><code>curl -X POST \
+  https://twoj-serwer.com/transcribe-media \
+  -H 'Content-Type: application/json' \
+  -H 'X-API-Key: twój_klucz_api' \
+  -d '{"media_url": "https://przykład.com/plik.mp3"}'</code></pre>
+
+    <h2 id="system-proxy">System proxy <a href="#system-proxy" class="header-anchor">#</a></h2>
+    
+    <p>API wykorzystuje system rotacji proxy z serwisu Webshare, aby ominąć limity zapytań do YouTube i zwiększyć niezawodność. System automatycznie:</p>
+    
+    <ol>
+        <li>Pobiera listę dostępnych proxy z API Webshare</li>
+        <li>Zarządza rotacją proxy dla każdego żądania</li>
+        <li>Śledzi niedziałające proxy i wyklucza je z użycia</li>
+        <li>Automatycznie odświeża listę proxy co godzinę</li>
+    </ol>
+    
+    <p>Diagram działania systemu proxy:</p>
+    <pre><code>┌────────────┐      ┌───────────────┐      ┌───────────────┐
+│  Żądanie   │──┬──>│   Aktywne     │─────>│   Wykonanie   │
+│ do YouTube │  │   │     proxy     │      │    żądania    │
+└────────────┘  │   └───────────────┘      └───────────────┘
+                │           ▲                       │
+                │           │                       │
+                │           │    ┌───────────────┐  │
+                │           └────│   Oznaczenie  │<─┘
+                │                │proxy jako OK  │
+                │                └───────────────┘
+                │
+                │   ┌───────────────┐      ┌───────────────┐
+                └──>│ Niedziałające │─────>│  Oznaczenie   │
+                    │     proxy     │      │proxy jako BAD │
+                    └───────────────┘      └───────────────┘</code></pre>
+
+    <h2 id="obsługa-błędów">Obsługa błędów <a href="#obsługa-błędów" class="header-anchor">#</a></h2>
+    
+    <p>API implementuje mechanizm ponownych prób (retry) dla żądań, które kończą się niepowodzeniem, zwłaszcza w kontekście pobierania napisów z YouTube. Dla każdego żądania wykonywanych jest maksymalnie 5 prób z różnymi proxy, zanim żądanie zostanie uznane za nieudane.</p>
+    
+    <p>System logowania rejestruje wszystkie błędy, umożliwiając śledzenie problemów. Logi zawierają:</p>
+    <ul>
+        <li>Szczegółowe informacje o każdym żądaniu</li>
+        <li>Informacje o użytych proxy</li>
+        <li>Błędy napotkane podczas przetwarzania</li>
+    </ul>
+
+    <h2 id="architektura">Architektura <a href="#architektura" class="header-anchor">#</a></h2>
+    
+    <p>Aplikacja ma modułową architekturę składającą się z kilku głównych komponentów:</p>
+    
+    <ol>
+        <li><strong>Serwer Flask</strong>: Obsługuje żądania HTTP i udostępnia API</li>
+        <li><strong>ProxyManager</strong>: Zarządza pulą proxy i ich rotacją</li>
+        <li><strong>Whisper Model</strong>: Odpowiada za transkrypcję audio</li>
+        <li><strong>YouTube Transcript API</strong>: Pobiera napisy z YouTube</li>
+    </ol>
+    
+    <h3 id="diagram-przepływu">Diagram przepływu danych <a href="#diagram-przepływu" class="header-anchor">#</a></h3>
+    
+    <pre><code>┌──────────┐     ┌──────────────┐     ┌─────────────┐
+│ Klient   │────>│ Autentykacja │────>│ Endpoint    │
+└──────────┘     └──────────────┘     │ Controller  │
+                                       └─────┬───────┘
+                                             │
+         ┌───────────────────────────────────┴───────────────┐
+         │                                                    │
+ ┌───────▼──────┐                                    ┌────────▼─────┐
+ │ Media        │                                    │ YouTube      │
+ │ Transcription│                                    │ Transcription│
+ └───────┬──────┘                                    └────────┬─────┘
+         │                                                    │
+ ┌───────▼──────┐                                    ┌────────▼─────┐
+ │ Whisper      │                                    │ ProxyManager │
+ │ Model        │                                    └────────┬─────┘
+ └───────┬──────┘                                             │
+         │                                           ┌────────▼─────┐
+ ┌───────▼──────┐                                    │ YouTube API  │
+ │ Transkrypcja │                                    └────────┬─────┘
+ └───────┬──────┘                                             │
+         │                                           ┌────────▼─────┐
+         └─────────────────────┬─────────────────────┘ Napisy       │
+                               │                      └──────────────┘
+                       ┌───────▼──────┐
+                       │ Odpowiedź    │
+                       │ JSON         │
+                       └──────────────┘</code></pre>
+
+    <h2 id="skalowanie">Skalowanie <a href="#skalowanie" class="header-anchor">#</a></h2>
+    
+    <p>System został zaprojektowany z myślą o możliwości skalowania w następujący sposób:</p>
+    
+    <ol>
+        <li><strong>Konteneryzacja</strong>: Aplikacja jest opakowana w kontener Docker, co ułatwia jej skalowanie poziome.</li>
+        <li><strong>Bezstanowość</strong>: API jest bezstanowe, co umożliwia uruchamianie wielu instancji.</li>
+        <li><strong>Gunicorn</strong>: Serwer WSGI Gunicorn obsługuje wiele procesów pracujących dla efektywnego wykorzystania zasobów.</li>
+    </ol>
+    
+    <h3 id="zalecenia-skalowanie">Zalecenia dotyczące skalowania <a href="#zalecenia-skalowanie" class="header-anchor">#</a></h3>
+    <ul>
+        <li>Dla obsługi większego ruchu należy zwiększyć liczbę instancji (kontenerów).</li>
+        <li>Długie transkrypcje mogą wymagać większego timeoutu (domyślnie 300s).</li>
+        <li>Dla bardzo dużych obciążeń rozważ zaimplementowanie systemu kolejkowania (np. Redis, RabbitMQ).</li>
+    </ul>
+
+    <h2 id="bezpieczeństwo">Bezpieczeństwo <a href="#bezpieczeństwo" class="header-anchor">#</a></h2>
+    
+    <p>Aplikacja implementuje kilka mechanizmów bezpieczeństwa:</p>
+    
+    <ol>
+        <li><strong>Uwierzytelnianie kluczem API</strong>: Wszystkie żądania wymagają prawidłowego klucza API.</li>
+        <li><strong>Niepriwilegowany użytkownik</strong>: W kontenerze Docker aplikacja działa jako niepriwilegowany użytkownik (<code>appuser</code>).</li>
+        <li><strong>Walidacja danych wejściowych</strong>: API waliduje wszystkie dane wejściowe przed przetwarzaniem.</li>
+        <li><strong>Czyszczenie plików tymczasowych</strong>: Pliki audio/wideo są usuwane po przetworzeniu.</li>
+    </ol>
+    
+    <h3 id="zalecenia-bezpieczeństwo">Zalecenia dotyczące bezpieczeństwa <a href="#zalecenia-bezpieczeństwo" class="header-anchor">#</a></h3>
+    <ul>
+        <li>Używaj HTTPS do ochrony komunikacji między klientem a API.</li>
+        <li>Regularnie aktualizuj zależności, aby eliminować potencjalne luki bezpieczeństwa.</li>
+        <li>Rozważ dodanie limitowania zapytań (rate limiting) dla zapobiegania atakom DDoS.</li>
+    </ul>
+
+    <h2 id="znane-ograniczenia">Znane ograniczenia <a href="#znane-ograniczenia" class="header-anchor">#</a></h2>
+    
+    <ol>
+        <li><strong>Rozmiar plików</strong>: Bardzo duże pliki mogą powodować timeout podczas pobierania lub transkrypcji.</li>
+        <li><strong>Limit czasowy</strong>: Domyślny timeout Gunicorn (300s) może być niewystarczający dla długich nagrań.</li>
+        <li><strong>Równoległość</strong>: Aktualnie system przetwarza żądania sekwencyjnie, co może ograniczać przepustowość.</li>
+        <li><strong>Akcenty i dialekty</strong>: Whisper może mieć problemy z niektórymi akcentami lub specyficznymi dialektami.</li>
+        <li><strong>Języki</strong>: Jakość transkrypcji może się różnić w zależności od języka.</li>
+    </ol>
+
+    <h2 id="rozwiązywanie-problemów">Rozwiązywanie problemów <a href="#rozwiązywanie-problemów" class="header-anchor">#</a></h2>
+    
+    <h3 id="najczęstsze-problemy">Najczęstsze problemy <a href="#najczęstsze-problemy" class="header-anchor">#</a></h3>
+    
+    <h4 id="brak-transkrypcji">Brak transkrypcji dla filmów YouTube <a href="#brak-transkrypcji" class="header-anchor">#</a></h4>
+    <p><strong>Problem</strong>: API zwraca błąd 404 podczas próby pobrania napisów.</p>
+    <p><strong>Rozwiązanie</strong>: Upewnij się, że:</p>
+    <ul>
+        <li>Film istnieje i jest publicznie dostępny</li>
+        <li>Film ma napisy (niektóre filmy nie mają dostępnych napisów)</li>
+        <li>System proxy działa prawidłowo (sprawdź logi)</li>
+    </ul>
+    
+    <h4 id="timeout">Timeout podczas transkrypcji <a href="#timeout" class="header-anchor">#</a></h4>
+    <p><strong>Problem</strong>: Żądanie zostaje przerwane z powodu timeout.</p>
+    <p><strong>Rozwiązanie</strong>:</p>
+    <ul>
+        <li>Zwiększ wartość parametru <code>--timeout</code> dla Gunicorn</li>
+        <li>Podziel długie nagrania na mniejsze części</li>
+        <li>Upewnij się, że masz wystarczającą ilość pamięci RAM dla modelu Whisper</li>
+    </ul>
+    
+    <h4 id="problemy-proxy">Problemy z proxy <a href="#problemy-proxy" class="header-anchor">#</a></h4>
+    <p><strong>Problem</strong>: Wszystkie proxy zostają oznaczone jako niedziałające.</p>
+    <p><strong>Rozwiązanie</strong>:</p>
+    <ul>
+        <li>Sprawdź ważność klucza API Webshare</li>
+        <li>Zweryfikuj, czy masz wystarczającą liczbę proxy w planie Webshare

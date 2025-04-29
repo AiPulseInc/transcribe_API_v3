@@ -1,0 +1,51 @@
+# Version Control
+.git
+.gitignore
+.gitattributes
+
+# Environment & Configuration
+.env
+*.env
+.venv
+venv/
+ENV/
+.python-version
+*.pyc
+__pycache__
+
+# Development & IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Build & Distribution
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Testing & Documentation
+tests/
+docs/
+*.md
+!README.md
+
+# Logs & Data
+*.log
+logs/
+data/
+tmp/
+
+# Docker
+Dockerfile
+docker-compose.yml
+*.docker
+
+# Media files
+*.mp3
+*.wav
+*.mp4
+*.avi
+*.mkv
