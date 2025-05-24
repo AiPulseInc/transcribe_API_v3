@@ -12,21 +12,27 @@ import random
 from datetime import datetime, timedelta
 import threading
 import time
+import json
 
-# Configure logging
+# Configure logging with UTF-8 encoding
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler()
+    ]
 )
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+# Ensure Flask uses UTF-8 encoding
+app.config['JSON_AS_ASCII'] = False
 
 class ProxyManager:
     def __init__(self, api_key):
         self.api_key = api_key
         self.proxies = []
-        self.failed_proxies = set()  # Track failed proxies
+        self.failed_proxies = set()
         self.last_update = None
         self.update_interval = timedelta(hours=1)
         self.lock = threading.Lock()
@@ -48,10 +54,10 @@ class ProxyManager:
                     'password': proxy['password'],
                     'host': proxy['proxy_address'],
                     'port': proxy['ports']['http'],
-                    'id': f"{proxy['proxy_address']}:{proxy['ports']['http']}"  # Unique identifier for proxy
+                    'id': f"{proxy['proxy_address']}:{proxy['ports']['http']}"
                 } for proxy in response.json()['results']]
                 self.last_update = datetime.now()
-                self.failed_proxies.clear()  # Reset failed proxies on update
+                self.failed_proxies.clear()
 
             logger.info(f"Successfully updated proxy list. Total proxies: {len(self.proxies)}")
         except Exception as e:
@@ -59,7 +65,7 @@ class ProxyManager:
 
     def get_random_proxy(self, exclude_failed=True):
         """Get a random proxy from the list, optionally excluding failed ones"""
-        if not self.proxies or (datetime.now() - self.last_update > self.update_interval):
+        if not self.proxies or (self.last_update and datetime.now() - self.last_update > self.update_interval):
             logger.info("Updating proxy list due to empty list or expired cache")
             self.update_proxies()
 
@@ -98,7 +104,7 @@ def proxy_update_worker(proxy_manager):
     while True:
         logger.info("Running scheduled proxy list update")
         proxy_manager.update_proxies()
-        time.sleep(3600)  # Sleep for 1 hour
+        time.sleep(3600)
 
 # Initialize proxy manager
 proxy_manager = ProxyManager(os.environ.get('WEBSHARE_API_KEY'))
@@ -142,10 +148,23 @@ def extract_video_id(url):
             return match.group(1)
     return None
 
+def sanitize_text(text):
+    """Sanitize text to ensure it's properly encoded and JSON-safe"""
+    if isinstance(text, bytes):
+        text = text.decode('utf-8', errors='replace')
+    
+    # Ensure the text is valid UTF-8
+    try:
+        text.encode('utf-8')
+        return text
+    except UnicodeEncodeError:
+        # If there are encoding issues, replace problematic characters
+        return text.encode('utf-8', errors='replace').decode('utf-8')
+
 def get_transcript_with_retries(video_id, preferred_lang=None, max_retries=5):
     """Get transcript with proxy rotation and retries"""
     errors = []
-    used_proxies = set()  # Track used proxies in this attempt
+    used_proxies = set()
 
     for attempt in range(max_retries):
         try:
@@ -193,7 +212,6 @@ def get_transcript_with_retries(video_id, preferred_lang=None, max_retries=5):
                 return None, "No transcript available for this video"
 
         except (VideoUnavailable, TranscriptsDisabled) as e:
-            # Don't retry for these specific errors
             logger.error(f"Video error: {str(e)}")
             return None, str(e)
         except Exception as e:
@@ -242,7 +260,10 @@ def transcribe_media():
         except Exception as e:
             logger.error(f"Error cleaning up temporary file: {str(e)}")
 
-        return jsonify({"response": result["text"]}), 200
+        # Sanitize the transcribed text
+        sanitized_text = sanitize_text(result["text"])
+        
+        return jsonify({"response": sanitized_text}), 200
 
     except requests.exceptions.RequestException as e:
         logger.error(f"Error downloading media: {str(e)}")
@@ -273,17 +294,39 @@ def transcribe_yt():
         if error:
             return jsonify({"message": error}), 404
 
-        transcript_text = transcript.fetch()
+        # Fetch the transcript data
+        transcript_data = transcript.fetch()
+        
+        # Sanitize all text in the transcript
+        sanitized_transcript = []
+        for entry in transcript_data:
+            sanitized_entry = {
+                'text': sanitize_text(entry.get('text', '')),
+                'start': entry.get('start', 0),
+                'duration': entry.get('duration', 0)
+            }
+            sanitized_transcript.append(sanitized_entry)
 
         response_data = {
-            "response": transcript_text,
+            "response": sanitized_transcript,
             "metadata": {
                 "language": transcript.language_code,
                 "requested_language": preferred_lang
             }
         }
 
-        return jsonify(response_data), 200
+        # Log the response for debugging (first few entries only)
+        logger.info(f"Transcript response prepared: {len(sanitized_transcript)} entries, language: {transcript.language_code}")
+        if sanitized_transcript:
+            logger.info(f"Sample entry: {sanitized_transcript[0]}")
+
+        # Use Flask's jsonify but ensure proper encoding
+        response = app.response_class(
+            response=json.dumps(response_data, ensure_ascii=False, indent=2),
+            status=200,
+            mimetype='application/json; charset=utf-8'
+        )
+        return response
 
     except Exception as e:
         logger.error(f"Error processing YouTube transcript request: {str(e)}")
